@@ -92,7 +92,31 @@ export function getSubjectMaxForExam(
 
 export const PASS_MARK_PERCENT = 33;
 
-export function calculateGrade(obtained: number, total: number): string {
+/**
+ * Calculates grade based on whether MCQ data is present/provided.
+ * - If mcqObtained is undefined/null (only CQ added), calculates grade using only CQ vs cqMax.
+ * - If both are provided, calculates using total obtained vs total max.
+ */
+export function calculateGrade(
+  obtained: number, 
+  total: number, 
+  cqObtained?: number, 
+  cqMax?: number, 
+  mcqObtained?: number | null
+): string {
+  // If MCQ is explicitly null/undefined (only CQ is added), compute grade based solely on CQ marks
+  if ((mcqObtained === undefined || mcqObtained === null) && cqObtained !== undefined && cqMax && cqMax > 0) {
+    const cqPct = (cqObtained / cqMax) * 100;
+    if (cqPct >= 80) return "A+";
+    if (cqPct >= 70) return "A";
+    if (cqPct >= 60) return "A-";
+    if (cqPct >= 50) return "B";
+    if (cqPct >= 40) return "C";
+    if (cqPct >= 33) return "D";
+    return "F";
+  }
+
+  // Otherwise, use total obtained vs total max
   if (total === 0) return "N/A";
   const pct = (obtained / total) * 100;
   if (pct >= 80) return "A+";
@@ -104,7 +128,16 @@ export function calculateGrade(obtained: number, total: number): string {
   return "F";
 }
 
-export function isPassing(obtained: number, total: number): boolean {
+export function isPassing(
+  obtained: number, 
+  total: number, 
+  cqObtained?: number, 
+  cqMax?: number, 
+  mcqObtained?: number | null
+): boolean {
+  if ((mcqObtained === undefined || mcqObtained === null) && cqObtained !== undefined && cqMax && cqMax > 0) {
+    return (cqObtained / cqMax) * 100 >= PASS_MARK_PERCENT;
+  }
   if (total === 0) return false;
   return (obtained / total) * 100 >= PASS_MARK_PERCENT;
 }
