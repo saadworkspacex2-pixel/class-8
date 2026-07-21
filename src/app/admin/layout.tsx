@@ -222,7 +222,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
               </svg>
             </div>
             <div>
-              <h1 className="text-sm font-bold text-charcoal">Sunshine Academy</h1>
+              <h1 className="text-sm font-bold text-charcoal">Class -VIII</h1>
               <p className={`text-xs font-semibold ${adminRole === "admin" ? "text-emerald" : "text-amber"}`}>
                 {adminRole === "admin" ? "⚡ Super Admin" : "🔒 Secondary Admin"}
               </p>
