@@ -307,43 +307,51 @@ export default function PublicDashboard() {
             <UpcomingEvents />
           </div>
 
-          {/* TOP 5 PODIUM — ALL IN ONE ROW */}
+          {/* ── TOP 5 PREMIUM PODIUM ── */}
           {top5.length >= 3 && (
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="liquid-glass-strong rounded-2xl md:rounded-3xl p-4 md:p-8 overflow-hidden"
+            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
+              className="relative bg-white rounded-[2.5rem] md:rounded-[3.5rem] p-6 md:p-10 shadow-[0_8px_40px_rgba(0,0,0,0.06)] overflow-hidden"
             >
-              <div className="flex items-center gap-2 md:gap-3 justify-center mb-5 md:mb-8">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" className="md:w-6 md:h-6"><circle cx="12" cy="8" r="6" /><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11" /></svg>
-                <h3 className="text-lg md:text-2xl font-bold text-charcoal">{t("dash.top_performers")}</h3>
+              {/* Soft gradient bar behind podium */}
+              <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-amber-50/80 via-white to-transparent pointer-events-none" />
+              {/* Trophy icon + title */}
+              <div className="flex items-center gap-3 justify-center mb-8 md:mb-10">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-amber-50 flex items-center justify-center">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" className="md:w-6 md:h-6"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+                </div>
+                <h3 className="text-lg md:text-2xl font-extrabold text-charcoal tracking-tight">{t("dash.top_performers")}</h3>
               </div>
-              <div className="grid grid-cols-5 gap-1.5 sm:gap-3 md:gap-4 items-end">
-                {[1, 0, 2, 3, 4].map((idx, colIndex) => {
+
+              {/* 5-column podium */}
+              <div className="grid grid-cols-5 gap-2 md:gap-3 items-end max-w-3xl mx-auto">
+                {[1, 0, 2, 3, 4].map((idx, col) => {
                   const s = top5[idx];
-                  if (!s) return <div key={`e-${colIndex}`} />;
-                  const isTop3 = idx <= 2;
-                  const heights = ["h-28 sm:h-36 md:h-44","h-20 sm:h-28 md:h-32","h-16 sm:h-20 md:h-24","h-14 sm:h-18 md:h-20","h-12 sm:h-14 md:h-16"];
-                  const bgs = ["podium-gold","podium-silver","podium-bronze","bg-gradient-to-b from-blue-400 via-blue-500 to-blue-700","bg-gradient-to-b from-emerald-400 via-emerald-500 to-emerald-700"];
-                  const medals = [["🥇","🥈","🥉"][idx]||"", idx === 3 ? "4️⃣" : "5️⃣"];
+                  if (!s) return <div key={`e-${col}`} />;
+                  const cfg: Record<number, { h: string; card: string; border: string; ring: string; label: string; glow: string }> = {
+                    0: { h: "h-28 sm:h-36 md:h-44", card: "bg-gradient-to-b from-amber-100 to-amber-300/80", border: "border-amber-300", ring: "#fbbf24", label: "🥇", glow: "shadow-[0_0_30px_rgba(251,191,36,0.15)]" },
+                    1: { h: "h-22 sm:h-28 md:h-34", card: "bg-gradient-to-b from-slate-100 to-slate-300/80", border: "border-slate-300", ring: "#94a3b8", label: "🥈", glow: "shadow-[0_0_20px_rgba(148,163,184,0.12)]" },
+                    2: { h: "h-18 sm:h-22 md:h-28", card: "bg-gradient-to-b from-orange-100 to-orange-300/80", border: "border-orange-300", ring: "#fb923c", label: "🥉", glow: "shadow-[0_0_20px_rgba(251,146,60,0.12)]" },
+                    3: { h: "h-14 sm:h-18 md:h-22", card: "bg-gradient-to-b from-blue-50 to-blue-200/80", border: "border-blue-200", ring: "#60a5fa", label: "4️⃣", glow: "shadow-[0_0_15px_rgba(96,165,250,0.1)]" },
+                    4: { h: "h-12 sm:h-14 md:h-18", card: "bg-gradient-to-b from-emerald-50 to-emerald-200/80", border: "border-emerald-200", ring: "#34d399", label: "5️⃣", glow: "shadow-[0_0_12px_rgba(52,211,153,0.1)]" },
+                  };
+                  const c = cfg[idx];
                   return (
-                    <motion.div key={s.studentId}
-                      initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: colIndex * 0.08 }}
-                      className="flex flex-col items-center min-w-0 cursor-pointer"
-                      onClick={() => setDetailStudent(s)}>
-                      <motion.div animate={{ y: [0, -4, 0] }} transition={{ duration: 2.5, repeat: Infinity, delay: colIndex * 0.3 }}
-                        className={`rounded-full bg-gradient-to-br from-white/90 to-white/60 backdrop-blur-xl border shadow-md flex items-center justify-center mb-1 md:mb-2 ${isTop3 ? "w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16" : "w-8 h-8 sm:w-10 sm:h-10 md:w-14 md:h-14"}`}
-                        style={{ borderColor: idx === 0 ? "#fbbf24" : idx === 1 ? "#d4d4d8" : idx === 2 ? "#fb923c" : idx === 3 ? "#60a5fa" : "#34d399" }}>
-                        {s.profilePicture ? <img src={s.profilePicture} alt="" className="w-full h-full rounded-full object-cover" />
-                          : <span className={`font-bold gradient-text ${isTop3 ? "text-sm md:text-xl" : "text-xs md:text-lg"}`}>{s.name.charAt(0)}</span>}
-                      </motion.div>
-                      <span className="text-[9px] sm:text-xs font-semibold text-charcoal truncate max-w-[50px] sm:max-w-[70px]">{s.name}</span>
-                      <span className="text-[7px] sm:text-[10px] text-muted mb-1">Roll {s.rollNumber}</span>
-                      <div className={`${heights[idx] || heights[0]} w-full rounded-t-xl md:rounded-t-2xl ${bgs[idx] || bgs[0]} flex flex-col items-center justify-start pt-1.5 md:pt-3 shadow-lg`}>
-                        <span className={`${isTop3 ? "text-base sm:text-xl md:text-3xl" : "text-sm md:text-2xl"}`}>{isTop3 ? medals[0] : medals[1]}</span>
-                        <span className={`text-white font-bold mt-0.5 md:mt-1 ${isTop3 ? "text-[10px] sm:text-xs md:text-sm" : "text-[8px] sm:text-xs md:text-sm"}`}>{s.totalObtained}</span>
-                        <span className={`text-white/70 ${isTop3 ? "text-[8px] sm:text-[10px] md:text-xs" : "text-[7px] sm:text-[10px] md:text-xs"}`}>GPA {s.gpa.toFixed(2)}</span>
+                    <motion.div key={s.studentId} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: col * 0.08 }}
+                      className="flex flex-col items-center cursor-pointer group" onClick={() => setDetailStudent(s)}>
+                      {/* Avatar with ring */}
+                      <div className={`relative -mb-5 md:-mb-7 z-20 w-12 h-12 sm:w-14 sm:h-14 md:w-18 md:h-18 rounded-full bg-white p-[3px] shadow-xl ${c.glow}`} style={{ border: `3px solid ${c.ring}` }}>
+                        <div className="w-full h-full rounded-full gradient-royal flex items-center justify-center text-white text-sm sm:text-base md:text-xl font-bold">
+                          {s.name.charAt(0)}
+                        </div>
+                      </div>
+                      {/* Name + Roll */}
+                      <p className="text-[10px] sm:text-xs font-bold text-charcoal text-center truncate max-w-[60px] sm:max-w-[80px] mt-0.5">{s.name}</p>
+                      <p className="text-[8px] sm:text-[10px] text-muted mb-1.5">R{s.rollNumber}</p>
+                      {/* Podium block */}
+                      <div className={`${c.h} w-full rounded-2xl ${c.card} border ${c.border} border-b-0 flex flex-col items-center justify-start pt-3 md:pt-4 shadow-lg ${c.glow} transition-transform group-hover:scale-[1.03] duration-300`}>
+                        <span className="text-lg sm:text-2xl md:text-3xl">{c.label}</span>
+                        <span className="text-[10px] sm:text-xs md:text-sm font-extrabold text-charcoal/80 mt-1">{s.totalObtained}</span>
+                        <span className={`text-[9px] sm:text-[10px] md:text-xs font-semibold ${s.gpa >= 5 ? "text-emerald" : s.gpa >= 4 ? "text-royal" : "text-amber"}`}>GPA {s.gpa.toFixed(2)}</span>
                       </div>
                     </motion.div>
                   );
