@@ -4,7 +4,6 @@ import { students, marks } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getSession, isAnyAdmin } from "@/lib/auth";
 import { queueIfSecondary } from "@/lib/pending";
-import { getSectionFromRoll } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
@@ -35,8 +34,7 @@ export async function PUT(
     const check = await queueIfSecondary(session, "edit_student", `Edit student (ID ${id}): ${body.name || "update"}`, `/api/students/${id}`, "PUT", body);
     if (check.queued) return NextResponse.json(check.response, { status: 202 });
 
-    const section = body.rollNumber ? getSectionFromRoll(parseInt(body.rollNumber)) : body.section;
-    const updated = await db.update(students).set({ ...body, section, updatedAt: new Date() }).where(eq(students.id, parseInt(id))).returning();
+    const updated = await db.update(students).set({ ...body, updatedAt: new Date() }).where(eq(students.id, parseInt(id))).returning();
     return NextResponse.json(updated[0]);
   } catch (err: unknown) {
     return NextResponse.json({ error: err instanceof Error ? err.message : "Failed" }, { status: 500 });

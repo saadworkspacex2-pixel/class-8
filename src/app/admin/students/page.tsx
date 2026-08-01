@@ -2,13 +2,11 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "@/components/Toast";
-import { SECTIONS, getAvailableRolls, getSectionFromRoll } from "@/lib/constants";
 
 interface Student {
   id: number;
   name: string;
   rollNumber: number;
-  section: string;
   password: string;
   profilePicture: string;
   studentId: string;
@@ -24,12 +22,10 @@ export default function StudentsPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [viewingStudent, setViewingStudent] = useState<Student | null>(null);
-  const [sectionFilter, setSectionFilter] = useState<string>("all");
 
   // Form fields
   const [name, setName] = useState("");
   const [rollNumber, setRollNumber] = useState<number>(2);
-  const [section, setSection] = useState<string>("dahlia");
   const [password, setPassword] = useState("");
   const [profilePicture, setProfilePicture] = useState("");
   const [studentId, setStudentId] = useState("");
@@ -59,7 +55,6 @@ export default function StudentsPage() {
   const resetForm = () => {
     setName("");
     setRollNumber(2);
-    setSection("dahlia");
     setPassword("");
     setProfilePicture("");
     setStudentId("");
@@ -78,7 +73,7 @@ export default function StudentsPage() {
 
     setSaving(true);
     try {
-      const payload = { name, rollNumber, section, password, profilePicture, studentId, fatherName, motherName, mobileNumber };
+      const payload = { name, rollNumber, password, profilePicture, studentId, fatherName, motherName, mobileNumber };
       if (editingId) {
         const res = await fetch(`/api/students/${editingId}`, {
           method: "PUT",
@@ -104,7 +99,6 @@ export default function StudentsPage() {
     setEditingId(s.id);
     setName(s.name);
     setRollNumber(s.rollNumber);
-    setSection(s.section || getSectionFromRoll(s.rollNumber));
     setPassword(s.password);
     setProfilePicture(s.profilePicture || "");
     setStudentId(s.studentId || "");
@@ -123,21 +117,18 @@ export default function StudentsPage() {
     } catch { toast("Delete failed", "error"); }
   };
 
-  const filtered = students.filter((s) => {
-    const matchesSearch = searchQuery
-      ? s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  const filtered = searchQuery
+    ? students.filter((s) =>
+        s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         s.rollNumber.toString().includes(searchQuery) ||
         s.fatherName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         s.mobileNumber?.includes(searchQuery)
-      : true;
-    const matchesSection = sectionFilter === "all" || s.section === sectionFilter;
-    return matchesSearch && matchesSection;
-  });
+      )
+    : students;
 
+  const evenRolls = Array.from({ length: 125 }, (_, i) => (i + 1) * 2);
   const usedRolls = new Set(students.map((s) => s.rollNumber));
-  const availRolls = editingId
-    ? getAvailableRolls(section as "shapla" | "dahlia")
-    : getAvailableRolls(section as "shapla" | "dahlia").filter((r) => !usedRolls.has(r));
+  const availableRolls = editingId ? evenRolls : evenRolls.filter((r) => !usedRolls.has(r));
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -155,25 +146,15 @@ export default function StudentsPage() {
         </button>
       </div>
 
-      {/* Search & Section Filter */}
-      <div className="liquid-glass rounded-2xl p-4 space-y-3">
+      {/* Search */}
+      <div className="liquid-glass rounded-2xl p-4">
         <div className="relative">
-          <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
           <input type="text" placeholder="Search by name, roll, father's name, or mobile..."
             value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-11 pr-4 py-3 rounded-2xl border border-white/40 bg-white/40 text-sm backdrop-blur-sm" />
-        </div>
-        <div className="flex gap-2">
-          {["all", ...SECTIONS].map((s) => (
-            <button key={s} onClick={() => setSectionFilter(s)}
-              className={`px-4 py-2 rounded-xl text-xs font-semibold capitalize transition-all ${
-                sectionFilter === s ? "gradient-royal text-white shadow-md" : "liquid-glass-sm text-muted hover:text-charcoal"
-              }`}>
-              {s === "all" ? "All Sections" : s === "shapla" ? "🌺 Shapla" : "🌸 Dahlia"}
-            </button>
-          ))}
         </div>
       </div>
 
@@ -182,7 +163,7 @@ export default function StudentsPage() {
         <div className="liquid-glass-strong rounded-3xl p-6 animate-scale-in">
           <div className="flex items-center gap-3 mb-5">
             <div className="w-10 h-10 rounded-xl bg-royal/10 flex items-center justify-center text-royal">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><line x1="19" y1="8" x2="19" y2="14" /><line x1="22" y1="11" x2="16" y2="11" />
               </svg>
             </div>
@@ -191,19 +172,10 @@ export default function StudentsPage() {
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <InputField label="Name *" value={name} onChange={setName} placeholder="Student name" required />
             <div>
-              <label className="block text-sm font-medium text-charcoal mb-1.5">Section *</label>
-              <select value={section} onChange={(e) => { setSection(e.target.value); setRollNumber(0); }}
-                className="w-full px-4 py-3 rounded-2xl border border-white/40 bg-white/40 text-sm backdrop-blur-sm">
-                <option value="shapla">🌺 Shapla (Odd Rolls)</option>
-                <option value="dahlia">🌸 Dahlia (Even Rolls)</option>
-              </select>
-            </div>
-            <div>
               <label className="block text-sm font-medium text-charcoal mb-1.5">Roll Number *</label>
               <select value={rollNumber} onChange={(e) => setRollNumber(parseInt(e.target.value))}
                 className="w-full px-4 py-3 rounded-2xl border border-white/40 bg-white/40 text-sm backdrop-blur-sm" required>
-                <option value={0}>Select roll...</option>
-                {availRolls.map((r) => (<option key={r} value={r}>{r}</option>))}
+                {availableRolls.map((r) => (<option key={r} value={r}>{r}</option>))}
               </select>
             </div>
             <InputField label="Password *" value={password} onChange={setPassword} placeholder="Login password" required />
@@ -216,7 +188,7 @@ export default function StudentsPage() {
               <button type="submit" disabled={saving}
                 className="gradient-royal text-white px-6 py-3 rounded-2xl text-sm font-semibold hover:opacity-90 transition-all disabled:opacity-60 shadow-lg shadow-royal/25 flex items-center gap-2">
                 {saving ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Saving...</> : (
-                  <><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> {editingId ? "Update" : "Create"}</>
+                  <><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> {editingId ? "Update" : "Create"}</>
                 )}
               </button>
               <button type="button" onClick={resetForm}
@@ -233,7 +205,7 @@ export default function StudentsPage() {
           <div className="relative liquid-glass-strong rounded-3xl p-8 w-full max-w-lg animate-scale-in">
             <button onClick={() => setViewingStudent(null)}
               className="absolute top-4 right-4 w-8 h-8 rounded-full liquid-glass-sm flex items-center justify-center text-muted hover:text-charcoal transition-colors">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                 <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
               </svg>
             </button>
@@ -248,11 +220,6 @@ export default function StudentsPage() {
               )}
               <h3 className="text-xl font-bold text-charcoal">{viewingStudent.name}</h3>
               <p className="text-sm text-muted">Roll No. {viewingStudent.rollNumber}</p>
-              <span className={`inline-block mt-1 px-3 py-0.5 rounded-full text-xs font-bold ${
-                viewingStudent.section === "shapla" ? "bg-rose-100 text-rose-600" : "bg-purple-100 text-purple-600"
-              }`}>
-                {viewingStudent.section === "shapla" ? "🌺 Shapla" : "🌸 Dahlia"}
-              </span>
             </div>
             <div className="space-y-3">
               {viewingStudent.studentId && <InfoRow label="Student ID" value={viewingStudent.studentId} />}
@@ -282,7 +249,6 @@ export default function StudentsPage() {
                 <tr className="border-b border-white/20">
                   <th className="text-left text-xs font-semibold text-muted uppercase tracking-wider py-4 px-6">Roll</th>
                   <th className="text-left text-xs font-semibold text-muted uppercase tracking-wider py-4 px-6">Student</th>
-                  <th className="text-left text-xs font-semibold text-muted uppercase tracking-wider py-4 px-6">Section</th>
                   <th className="text-left text-xs font-semibold text-muted uppercase tracking-wider py-4 px-6 hidden lg:table-cell">Father</th>
                   <th className="text-left text-xs font-semibold text-muted uppercase tracking-wider py-4 px-6 hidden md:table-cell">Mobile</th>
                   <th className="text-right text-xs font-semibold text-muted uppercase tracking-wider py-4 px-6">Actions</th>
@@ -312,28 +278,19 @@ export default function StudentsPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="py-4 px-6">
-                      <span className={`px-2.5 py-1 rounded-lg text-xs font-bold ${
-                        (s.section || getSectionFromRoll(s.rollNumber)) === "shapla" 
-                          ? "bg-rose-50 text-rose-600" 
-                          : "bg-purple-50 text-purple-600"
-                      }`}>
-                        {s.section === "shapla" ? "🌺 Shapla" : "🌸 Dahlia"}
-                      </span>
-                    </td>
                     <td className="py-4 px-6 text-sm text-muted hidden lg:table-cell">{s.fatherName || "—"}</td>
                     <td className="py-4 px-6 text-sm text-muted hidden md:table-cell">{s.mobileNumber || "—"}</td>
                     <td className="py-4 px-6 text-right" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-2">
                         <button onClick={() => handleEdit(s)}
                           className="p-2 rounded-xl bg-royal/10 text-royal hover:bg-royal/20 transition-all" title="Edit">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                           </svg>
                         </button>
                         <button onClick={() => handleDelete(s.id)}
                           className="p-2 rounded-xl bg-crimson/10 text-crimson hover:bg-crimson/20 transition-all" title="Delete">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                           </svg>
                         </button>
@@ -342,9 +299,9 @@ export default function StudentsPage() {
                   </tr>
                 ))}
                 {filtered.length === 0 && (
-                  <tr><td colSpan={6} className="py-16 text-center text-muted text-sm">
+                  <tr><td colSpan={5} className="py-16 text-center text-muted text-sm">
                     <div className="w-16 h-16 rounded-3xl bg-royal/10 flex items-center justify-center mx-auto mb-4">
-                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#006FEE" strokeWidth="1.5">
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#006FEE" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>
                       </svg>
                     </div>

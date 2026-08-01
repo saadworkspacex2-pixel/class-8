@@ -30,13 +30,13 @@ export const settings = pgTable("settings", {
   captainTitle: text("captain_title").default("Captain"),
   monitorRoll: integer("monitor_roll"),
   monitorTitle: text("monitor_title").default("Monitor"),
+  publicDashboardExamType: text("public_dashboard_exam_type").default("Half Yearly"),
 });
 
 export const students = pgTable("students", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   rollNumber: integer("roll_number").notNull().unique(),
-  section: text("section").default("dahlia").notNull(), // shapla or dahlia
   password: text("password").notNull(),
   profilePicture: text("profile_picture").default(""),
   fatherName: text("father_name").default(""),

@@ -19,7 +19,6 @@
     "drizzle-orm": "0.45.2",
     "firebase": "^12.16.0",
     "framer-motion": "^12.42.2",
-    "git": "^0.1.5",
     "jose": "^6.2.3",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.8",

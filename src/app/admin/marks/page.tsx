@@ -21,7 +21,7 @@ interface MarkEntry {
 }
 
 export default function MarkEntryPage() {
-  const [examType, setExamType] = useState<string>(EXAM_TYPES[0]);
+  const [examType, setExamType] = useState<string>("Half Yearly");
   const [subject, setSubject] = useState<string>(SUBJECTS[0]);
   const [entries, setEntries] = useState<MarkEntry[]>([]);
   const [loading, setLoading] = useState(false);
@@ -176,6 +176,21 @@ export default function MarkEntryPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* Sub-navigation */}
+      <div className="flex items-center gap-2">
+        <span className="px-4 py-2 rounded-xl text-xs font-semibold gradient-royal text-white shadow-md">
+          Manual Entry
+        </span>
+        <a href="/admin/marks/bulk-upload" className="px-4 py-2 rounded-xl text-xs font-semibold liquid-glass-sm text-muted hover:text-charcoal transition-all">
+          Bulk Upload
+        </a>
+        <a href="/admin/marks/import" className="px-4 py-2 rounded-xl text-xs font-semibold liquid-glass-sm text-muted hover:text-charcoal transition-all">
+          Smart Import
+        </a>
+        <a href="/admin/marks/spreadsheet" className="px-4 py-2 rounded-xl text-xs font-semibold liquid-glass-sm text-muted hover:text-charcoal transition-all">
+          Spreadsheet
+        </a>
+      </div>
       <div>
         <h1 className="text-2xl font-bold text-charcoal">Mark Entry</h1>
         <p className="text-sm text-muted">Excel-like spreadsheet for fast mark entry</p>

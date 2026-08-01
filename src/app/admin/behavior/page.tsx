@@ -7,6 +7,12 @@ interface Student { id: number; name: string; rollNumber: number; profilePicture
 interface Behavior { studentId: number; punctuality: number; discipline: number; participation: number; homework: number; teamwork: number; creativity: number; }
 interface Comment { id: number; studentId: number; teacherName: string; teacherSubject: string; comment: string; type: string; createdAt: string; }
 
+const BEHAVIOR_KEYS = ["punctuality","discipline","participation","homework","teamwork","creativity"] as const;
+function avgBehavior(b: Behavior): number {
+  const sum = BEHAVIOR_KEYS.reduce((a, k) => a + (b[k] || 0), 0);
+  return Math.round(sum / BEHAVIOR_KEYS.length);
+}
+
 export default function BehaviorPage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -136,9 +142,9 @@ export default function BehaviorPage() {
             <div className="mt-6 liquid-glass-sm rounded-2xl p-4">
               <p className="text-xs font-semibold text-muted mb-2">Average Behavior</p>
               <div className="flex items-center gap-3">
-                <div className="text-2xl font-black text-charcoal">{Math.round((behavior.punctuality + behavior.discipline + behavior.participation + behavior.homework + behavior.teamwork + behavior.creativity)/6)}%</div>
+                <div className="text-2xl font-black text-charcoal">{avgBehavior(behavior)}%</div>
                 <div className="flex-1 h-2 bg-white/30 rounded-full overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-royal to-emerald rounded-full transition-all" style={{ width: `${Math.round((behavior.punctuality + behavior.discipline + behavior.participation + behavior.homework + behavior.teamwork + behavior.creativity)/6)}%` }} />
+                  <div className="h-full bg-gradient-to-r from-royal to-emerald rounded-full transition-all" style={{ width: `${avgBehavior(behavior)}%` }} />
                 </div>
               </div>
             </div>

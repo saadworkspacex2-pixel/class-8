@@ -4,7 +4,6 @@ import { students, settings } from "@/db/schema";
 import { eq, asc } from "drizzle-orm";
 import { getSession, isAnyAdmin } from "@/lib/auth";
 import { queueIfSecondary } from "@/lib/pending";
-import { getSectionFromRoll } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
@@ -29,7 +28,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { name, rollNumber, password, section: rawSection } = body;
+    const { name, rollNumber, password } = body;
 
     if (!name || !rollNumber || !password) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
@@ -49,21 +48,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Roll number already exists" }, { status: 400 });
     }
 
-    // Determine section from roll number
-    const section = getSectionFromRoll(rollNumber);
-
     const newStudent = await db
       .insert(students)
       .values({
         name,
         rollNumber: parseInt(rollNumber),
-        section,
         password,
         profilePicture: body.profilePicture || "",
-        fatherName: body.fatherName || "",
-        motherName: body.motherName || "",
-        mobileNumber: body.mobileNumber || "",
-        studentId: body.studentId || "",
       })
       .returning();
 

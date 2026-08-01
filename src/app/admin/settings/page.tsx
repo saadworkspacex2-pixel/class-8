@@ -57,6 +57,8 @@ export default function SettingsPage() {
 
   // Exam marks
   const [examFullMarks, setExamFullMarks] = useState<Record<string, Record<string, number>>>({});
+  // Public Dashboard
+  const [publicDashboardExamType, setPublicDashboardExamType] = useState("Half Yearly");
 
   useEffect(() => {
     fetch("/api/students").then(r=>r.json()).then(d=>setStudentsList(Array.isArray(d)?d:[])).catch(()=>{});
@@ -78,6 +80,7 @@ export default function SettingsPage() {
       setDeveloperRoll(d.developerRoll || 6);
       setDeveloperBio(d.developerBio || "");
       setDeveloperPicture(d.developerPicture || "");
+      setPublicDashboardExamType((d as any).publicDashboardExamType || "Half Yearly");
 
       const existing = d.examFullMarks || {};
       const full: Record<string, Record<string, number>> = {};
@@ -121,6 +124,7 @@ export default function SettingsPage() {
           captainTitle,
           monitorRoll,
           monitorTitle,
+          publicDashboardExamType,
         }),
       });
       if (res.ok) toast("Settings saved!", "success");
@@ -181,6 +185,20 @@ export default function SettingsPage() {
               </label>
               <input type="number" value={nextRollNumber} onChange={(e) => setNextRollNumber(parseInt(e.target.value) || 2)}
                 className="w-full px-4 py-3 rounded-2xl border border-white/40 bg-white/40 text-sm backdrop-blur-sm" min="2" step="2" />
+            </div>
+          </div>
+          <div className="md:col-span-2 pt-2">
+            <label className="flex items-center gap-2 text-sm font-medium text-charcoal mb-1.5">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg>
+              Public Dashboard Default Exam
+            </label>
+            <p className="text-xs text-muted mb-2">Select which exam results are shown by default on the public home page.</p>
+            <div className="flex flex-wrap gap-2">
+              {EXAM_TYPES.map((exam) => (
+                <button key={exam} onClick={() => setPublicDashboardExamType(exam)}
+                  className={`px-4 py-2.5 rounded-2xl text-sm font-semibold transition-all ${publicDashboardExamType === exam ? "gradient-royal text-white shadow-md" : "liquid-glass-sm text-muted hover:text-charcoal"}`}
+                >{exam}</button>
+              ))}
             </div>
           </div>
         </div>
