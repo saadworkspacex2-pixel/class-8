@@ -310,11 +310,9 @@ export default function PublicDashboard() {
           {/* ── TOP 5 PREMIUM PODIUM ── */}
           {top5.length >= 3 && (
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
-              className="relative bg-white rounded-[2.5rem] md:rounded-[3.5rem] p-6 md:p-10 shadow-[0_8px_40px_rgba(0,0,0,0.06)] overflow-hidden"
+              className="bg-white rounded-[2.5rem] md:rounded-[3.5rem] p-6 md:p-10 shadow-[0_8px_40px_rgba(0,0,0,0.06)]"
             >
-              {/* Soft gradient bar behind podium */}
-              <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-amber-50/80 via-white to-transparent pointer-events-none" />
-              {/* Trophy icon + title */}
+              {/* Header */}
               <div className="flex items-center gap-3 justify-center mb-8 md:mb-10">
                 <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-amber-50 flex items-center justify-center">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" className="md:w-6 md:h-6"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
@@ -322,36 +320,46 @@ export default function PublicDashboard() {
                 <h3 className="text-lg md:text-2xl font-extrabold text-charcoal tracking-tight">{t("dash.top_performers")}</h3>
               </div>
 
-              {/* 5-column podium */}
+              {/* Visual order: 5th | 3rd | 1st | 2nd | 4th */}
               <div className="grid grid-cols-5 gap-2 md:gap-3 items-end max-w-3xl mx-auto">
-                {[1, 0, 2, 3, 4].map((idx, col) => {
+                {[4, 2, 0, 1, 3].map((idx, col) => {
                   const s = top5[idx];
                   if (!s) return <div key={`e-${col}`} />;
-                  const cfg: Record<number, { h: string; card: string; border: string; ring: string; label: string; glow: string }> = {
-                    0: { h: "h-28 sm:h-36 md:h-44", card: "bg-gradient-to-b from-amber-100 to-amber-300/80", border: "border-amber-300", ring: "#fbbf24", label: "🥇", glow: "shadow-[0_0_30px_rgba(251,191,36,0.15)]" },
-                    1: { h: "h-22 sm:h-28 md:h-34", card: "bg-gradient-to-b from-slate-100 to-slate-300/80", border: "border-slate-300", ring: "#94a3b8", label: "🥈", glow: "shadow-[0_0_20px_rgba(148,163,184,0.12)]" },
-                    2: { h: "h-18 sm:h-22 md:h-28", card: "bg-gradient-to-b from-orange-100 to-orange-300/80", border: "border-orange-300", ring: "#fb923c", label: "🥉", glow: "shadow-[0_0_20px_rgba(251,146,60,0.12)]" },
-                    3: { h: "h-14 sm:h-18 md:h-22", card: "bg-gradient-to-b from-blue-50 to-blue-200/80", border: "border-blue-200", ring: "#60a5fa", label: "4️⃣", glow: "shadow-[0_0_15px_rgba(96,165,250,0.1)]" },
-                    4: { h: "h-12 sm:h-14 md:h-18", card: "bg-gradient-to-b from-emerald-50 to-emerald-200/80", border: "border-emerald-200", ring: "#34d399", label: "5️⃣", glow: "shadow-[0_0_12px_rgba(52,211,153,0.1)]" },
-                  };
-                  const c = cfg[idx];
+                  const ranks = [
+                    { h: "h-28 sm:h-36 md:h-44", card: "bg-gradient-to-b from-amber-50 to-amber-100/80 border-amber-200/60", bar: "from-amber-200 to-amber-400", ring: "#fbbf24", icon: "#f59e0b", scale: 1.0 },
+                    { h: "h-22 sm:h-28 md:h-34", card: "bg-gradient-to-b from-slate-50 to-slate-100/80 border-slate-200/60", bar: "from-slate-200 to-slate-400", ring: "#94a3b8", icon: "#64748b", scale: 0.9 },
+                    { h: "h-18 sm:h-22 md:h-28", card: "bg-gradient-to-b from-orange-50 to-orange-100/80 border-orange-200/60", bar: "from-orange-200 to-orange-400", ring: "#fb923c", icon: "#ea580c", scale: 0.85 },
+                    { h: "h-14 sm:h-18 md:h-22", card: "bg-gradient-to-b from-blue-50 to-blue-100/80 border-blue-200/60", bar: "from-blue-200 to-blue-400", ring: "#60a5fa", icon: "#3b82f6", scale: 0.8 },
+                    { h: "h-12 sm:h-14 md:h-18", card: "bg-gradient-to-b from-emerald-50 to-emerald-100/80 border-emerald-200/60", bar: "from-emerald-200 to-emerald-400", ring: "#34d399", icon: "#10b981", scale: 0.75 },
+                  ];
+                  const r = ranks[idx];
                   return (
-                    <motion.div key={s.studentId} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: col * 0.08 }}
-                      className="flex flex-col items-center cursor-pointer group" onClick={() => setDetailStudent(s)}>
-                      {/* Avatar with ring */}
-                      <div className={`relative -mb-5 md:-mb-7 z-20 w-12 h-12 sm:w-14 sm:h-14 md:w-18 md:h-18 rounded-full bg-white p-[3px] shadow-xl ${c.glow}`} style={{ border: `3px solid ${c.ring}` }}>
-                        <div className="w-full h-full rounded-full gradient-royal flex items-center justify-center text-white text-sm sm:text-base md:text-xl font-bold">
-                          {s.name.charAt(0)}
-                        </div>
+                    <motion.div key={s.studentId}
+                      initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: col * 0.06 }}
+                      style={{ transformOrigin: 'bottom center' }}
+                      className="flex flex-col items-center gap-1.5 md:gap-2 cursor-pointer group"
+                      onClick={() => setDetailStudent(s)}>
+                      {/* 1. Avatar */}
+                      <motion.div
+                        whileHover={{ scale: 1.08, y: -4 }}
+                        className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full bg-white shadow-lg flex items-center justify-center shrink-0"
+                        style={{ border: `3px solid ${r.ring}` }}>
+                        {s.profilePicture ? <img src={s.profilePicture} alt="" className="w-full h-full rounded-full object-cover" />
+                          : <span className="text-sm sm:text-base md:text-lg font-bold bg-gradient-to-br from-royal to-purple-600 bg-clip-text text-transparent">{s.name.charAt(0)}</span>}
+                      </motion.div>
+                      {/* 2. Name + Roll */}
+                      <div className="flex flex-col items-center gap-0 shrink-0">
+                        <p className="text-[10px] sm:text-xs font-bold text-charcoal text-center truncate max-w-[60px] sm:max-w-[80px]">{s.name}</p>
+                        <p className="text-[8px] sm:text-[10px] text-muted">R{s.rollNumber}</p>
                       </div>
-                      {/* Name + Roll */}
-                      <p className="text-[10px] sm:text-xs font-bold text-charcoal text-center truncate max-w-[60px] sm:max-w-[80px] mt-0.5">{s.name}</p>
-                      <p className="text-[8px] sm:text-[10px] text-muted mb-1.5">R{s.rollNumber}</p>
-                      {/* Podium block */}
-                      <div className={`${c.h} w-full rounded-2xl ${c.card} border ${c.border} border-b-0 flex flex-col items-center justify-start pt-3 md:pt-4 shadow-lg ${c.glow} transition-transform group-hover:scale-[1.03] duration-300`}>
-                        <span className="text-lg sm:text-2xl md:text-3xl">{c.label}</span>
-                        <span className="text-[10px] sm:text-xs md:text-sm font-extrabold text-charcoal/80 mt-1">{s.totalObtained}</span>
-                        <span className={`text-[9px] sm:text-[10px] md:text-xs font-semibold ${s.gpa >= 5 ? "text-emerald" : s.gpa >= 4 ? "text-royal" : "text-amber"}`}>GPA {s.gpa.toFixed(2)}</span>
+                      {/* 3. Glassmorphic Rank Card */}
+                      <div className={`${r.h} w-full rounded-2xl ${r.card} border shadow-md backdrop-blur-sm flex flex-col items-center justify-center gap-1 px-2 transition-all duration-300 group-hover:shadow-lg group-hover:-translate-y-1`}>
+                        {/* Rank medal SVG */}
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={r.icon} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="md:w-6 md:h-6 shrink-0">
+                          <circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>
+                        </svg>
+                        <span className="text-[10px] sm:text-xs md:text-sm font-extrabold text-charcoal">{s.totalObtained}</span>
+                        <span className={`text-[9px] sm:text-[10px] md:text-xs font-bold ${s.gpa >= 5 ? "text-emerald" : s.gpa >= 4 ? "text-royal" : "text-amber"}`}>GPA {s.gpa.toFixed(2)}</span>
                       </div>
                     </motion.div>
                   );
