@@ -233,65 +233,53 @@ export default function LeaderboardPage() {
         </div>
       ) : (
         <>
-          {/* ===== PODIUM TOP 5 ===== */}
+          {/* ===== PODIUM TOP 5 — ALL IN ONE ROW ===== */}
           {ranked.length >= 3 && (
             <LayoutGroup>
-              <motion.div layout className="grid grid-cols-3 gap-2 md:gap-4 items-end mb-2">
-                {podiumConfig.map(({ index, height, bg, border, text, medal, col }) => {
-                  const s = top5[index];
-                  if (!s) return null;
+              <motion.div layout className="grid grid-cols-5 gap-1.5 md:gap-3 items-end">
+                {/* 2nd (index 1) → column 1 */}
+                {[1, 0, 2, 3, 4].map((idx, colIndex) => {
+                  const s = top5[idx];
+                  if (!s) return <div key={`empty-${colIndex}`} />;
+                  const isTop3 = idx <= 2;
+                  const is4th = idx === 3;
+                  const is5th = idx === 4;
+                  const height = isTop3
+                    ? (idx === 0 ? "h-28 md:h-40" : idx === 1 ? "h-20 md:h-32" : "h-16 md:h-24")
+                    : (is4th ? "h-14 md:h-20" : "h-12 md:h-16");
+                  const bg = isTop3
+                    ? (idx === 0 ? "from-amber-300 via-yellow-300 to-amber-500 border-amber-300/60" : idx === 1 ? "from-gray-300 via-gray-200 to-gray-400 border-gray-300/50" : "from-orange-400 via-orange-500 to-orange-700 border-orange-400/50")
+                    : (is4th ? "from-blue-300 via-blue-400 to-blue-600 border-blue-400/50" : "from-emerald-300 via-emerald-500 to-emerald-700 border-emerald-400/50");
+                  const text = isTop3
+                    ? (idx === 0 ? "text-amber-900" : idx === 1 ? "text-gray-700" : "text-orange-100")
+                    : (is4th ? "text-blue-50" : "text-emerald-50");
+                  const medal = isTop3 ? ["🥇","🥈","🥉"][idx] : is4th ? "4️⃣" : "5️⃣";
+                  const borderColor = isTop3
+                    ? (idx === 0 ? "#fbbf24" : idx === 1 ? "#d4d4d8" : "#fb923c")
+                    : (is4th ? "#60a5fa" : "#34d399");
                   return (
-                    <motion.div layout key={s.studentId} className={`${col} flex flex-col items-center`}
-                      initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }}>
-                      <motion.div animate={{ y: [0, -6, 0] }} transition={{ duration: 3, repeat: Infinity, delay: index * 0.3 }}
-                        className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-gradient-to-br from-white/90 to-white/60 backdrop-blur-xl border shadow-lg flex items-center justify-center mb-2 relative"
-                        style={{ borderColor: index === 0 ? "#d4d4d8" : index === 1 ? "#fbbf24" : "#fb923c" }}>
+                    <motion.div key={s.studentId} layout
+                      initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: colIndex * 0.08 }}
+                      className="flex flex-col items-center cursor-pointer min-w-0"
+                      onClick={() => setViewingStudent(s)}>
+                      <motion.div animate={{ y: [0, -5, 0] }} transition={{ duration: 2.5, repeat: Infinity, delay: colIndex * 0.3 }}
+                        className={`rounded-full bg-gradient-to-br from-white/90 to-white/60 backdrop-blur-xl border shadow-lg flex items-center justify-center mb-1.5 relative ${isTop3 ? "w-11 h-11 md:w-14 md:h-14" : "w-9 h-9 md:w-11 md:h-11"}`}
+                        style={{ borderColor }}>
                         {s.profilePicture ? <img src={s.profilePicture} alt="" className="w-full h-full rounded-full object-cover" />
-                          : <span className="text-lg md:text-2xl font-bold gradient-text">{s.name.charAt(0)}</span>}
+                          : <span className={`font-bold gradient-text ${isTop3 ? "text-sm md:text-lg" : "text-xs md:text-sm"}`}>{s.name.charAt(0)}</span>}
                       </motion.div>
-                      <p className="text-[10px] md:text-xs font-bold text-charcoal text-center truncate max-w-[70px] md:max-w-[120px]">{s.name}</p>
-                      <p className="text-[9px] text-muted mb-1">Roll {s.rollNumber}</p>
-                      <div className={`${height} w-full rounded-t-2xl bg-gradient-to-b ${bg} ${border} border border-b-0 flex flex-col items-center justify-start pt-3 relative overflow-hidden shadow-xl`}>
+                      <p className="text-[9px] md:text-[10px] font-bold text-charcoal text-center truncate max-w-[55px] md:max-w-[90px]">{s.name}</p>
+                      <p className="text-[7px] md:text-[8px] text-muted mb-1">R{s.rollNumber}</p>
+                      <div className={`${height} w-full rounded-t-2xl bg-gradient-to-b ${bg} border border-b-0 flex flex-col items-center justify-start pt-2.5 md:pt-3 relative overflow-hidden shadow-xl`}>
                         <div className="absolute inset-0 bg-white/10 backdrop-blur-[2px]" />
-                        <span className="text-2xl md:text-4xl relative z-10">{medal}</span>
-                        <span className={`text-[10px] md:text-sm font-bold mt-1 relative z-10 ${text}`}>{s.totalObtained}</span>
-                        <span className={`text-[9px] md:text-xs font-semibold relative z-10 ${text}/70`}>GPA {s.gpa.toFixed(2)}</span>
+                        <span className={`relative z-10 ${isTop3 ? "text-xl md:text-3xl" : "text-base md:text-xl"}`}>{medal}</span>
+                        <span className={`mt-0.5 md:mt-1 font-bold relative z-10 ${isTop3 ? "text-[9px] md:text-xs" : "text-[8px] md:text-[10px]"} ${text}`}>{s.totalObtained}</span>
+                        <span className={`font-semibold relative z-10 ${isTop3 ? "text-[8px] md:text-[10px]" : "text-[7px] md:text-[9px]"} ${text}/70`}>GPA {s.gpa.toFixed(2)}</span>
                       </div>
                     </motion.div>
                   );
                 })}
               </motion.div>
-              {/* 4th and 5th place — mini podium blocks */}
-              {ranked.length >= 5 && (
-                <motion.div layout className="grid grid-cols-2 gap-2 md:gap-4 mt-1">
-                  {[3, 4].map(i => {
-                    const s = top5[i]; if (!s) return null;
-                    const miniGrains = [
-                      "from-blue-300 via-blue-400 to-blue-600 border-blue-400/50 text-blue-100",
-                      "from-emerald-300 via-emerald-500 to-emerald-700 border-emerald-400/50 text-emerald-100",
-                    ];
-                    return (
-                      <motion.div layout key={s.studentId}
-                        initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 + i * 0.1 }}
-                        className="flex flex-col items-center cursor-pointer" onClick={() => setViewingStudent(s)}>
-                        <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 2.5, repeat: Infinity, delay: i * 0.4 }}
-                          className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-white/90 to-white/60 backdrop-blur-xl border shadow-md flex items-center justify-center mb-1.5"
-                          style={{ borderColor: i === 3 ? "#60a5fa" : "#34d399" }}>
-                          <span className="text-sm md:text-base font-bold gradient-text">{s.name.charAt(0)}</span>
-                        </motion.div>
-                        <p className="text-[9px] md:text-[10px] font-bold text-charcoal text-center truncate max-w-[60px] md:max-w-[100px]">{s.name}</p>
-                        <p className="text-[8px] text-muted mb-1">Roll {s.rollNumber}</p>
-                        <div className={`h-16 md:h-20 w-full rounded-t-2xl bg-gradient-to-b ${miniGrains[i-3] || miniGrains[0]} border border-b-0 flex flex-col items-center justify-start pt-2 relative overflow-hidden shadow-lg`}>
-                          <div className="absolute inset-0 bg-white/5" />
-                          <span className="text-lg md:text-2xl relative z-10">{i === 3 ? "4️⃣" : "5️⃣"}</span>
-                          <span className="text-[9px] md:text-xs font-bold mt-0.5 relative z-10">{s.totalObtained}</span>
-                          <span className="text-[8px] md:text-[10px] font-semibold relative z-10 opacity-70">GPA {s.gpa.toFixed(2)}</span>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </motion.div>
-              )}
             </LayoutGroup>
           )}
 
