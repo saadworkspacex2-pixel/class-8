@@ -325,25 +325,32 @@ export default function PublicDashboard() {
                 <PodiumCard student={top5[0]} position={1} height="h-28 sm:h-36 md:h-44" bgClass="podium-gold" />
                 <PodiumCard student={top5[2]} position={3} height="h-16 sm:h-20 md:h-24" bgClass="podium-bronze" />
               </div>
-              {/* 4th and 5th horizontal strip */}
+              {/* 4th and 5th — mini podium */}
               {top5.length >= 5 && (
-                <div className="flex gap-2 md:gap-4 mt-2">
+                <div className="flex gap-2 sm:gap-4 md:gap-6 justify-center mt-2">
                   {[3, 4].map(i => {
                     const s = top5[i]; if (!s) return null;
+                    const miniBg = i === 3 ? "bg-gradient-to-b from-blue-400 via-blue-500 to-blue-700" : "bg-gradient-to-b from-emerald-400 via-emerald-500 to-emerald-700";
+                    const miniH = i === 3 ? "h-14 sm:h-20 md:h-24" : "h-12 sm:h-16 md:h-20";
+                    const medal = i === 3 ? "4️⃣" : "5️⃣";
                     return (
                       <motion.div key={s.studentId}
-                        initial={{ opacity: 0, x: i === 3 ? -20 : 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.3 + i * 0.1 }}
-                        className="flex-1 flex items-center gap-3 liquid-glass-sm rounded-2xl p-3 cursor-pointer hover:bg-white/40 transition-all"
+                        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 + i * 0.1 }}
+                        className="flex flex-col items-center min-w-0"
                         onClick={() => setDetailStudent(s)}>
-                        <span className="w-7 h-7 rounded-lg bg-royal/10 text-royal text-xs font-bold flex items-center justify-center shrink-0">{i+1}</span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-semibold text-charcoal truncate">{s.name}</p>
-                          <p className="text-[10px] text-muted">Roll {s.rollNumber} · GPA {s.gpa.toFixed(2)}</p>
+                        <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 2.5, repeat: Infinity, delay: i * 0.4 }}
+                          className="w-8 h-8 sm:w-10 sm:h-10 md:w-14 md:h-14 rounded-full bg-gradient-to-br from-white/90 to-white/60 backdrop-blur-xl border shadow-md flex items-center justify-center mb-1 md:mb-2 cursor-pointer"
+                          style={{ borderColor: i === 3 ? "#60a5fa" : "#34d399" }}>
+                          {s.profilePicture ? <img src={s.profilePicture} alt="" className="w-full h-full rounded-full object-cover" />
+                            : <span className="text-sm md:text-lg font-bold gradient-text">{s.name.charAt(0)}</span>}
+                        </motion.div>
+                        <span className="text-[10px] sm:text-xs md:text-sm font-semibold text-charcoal truncate max-w-[60px] sm:max-w-[80px]">{s.name}</span>
+                        <span className="text-[8px] sm:text-[10px] text-muted mb-1">Roll {s.rollNumber}</span>
+                        <div className={`${miniH} w-12 sm:w-16 md:w-24 rounded-t-xl md:rounded-t-2xl ${miniBg} flex flex-col items-center justify-start pt-1.5 md:pt-3 shadow-lg cursor-pointer`}>
+                          <span className="text-sm md:text-2xl">{medal}</span>
+                          <span className="text-white text-[9px] sm:text-xs md:text-sm font-bold mt-0.5 md:mt-1">{s.totalObtained}</span>
+                          <span className="text-white/70 text-[8px] sm:text-[10px] md:text-xs">GPA {s.gpa.toFixed(2)}</span>
                         </div>
-                        <span className="text-xs font-bold text-charcoal">{s.totalObtained}</span>
-                        <span className="px-1.5 py-0.5 rounded-lg text-[10px] font-bold" style={{ color: GRADE_COLORS[s.overallGrade] || "#6B7280" }}>{s.overallGrade}</span>
                       </motion.div>
                     );
                   })}

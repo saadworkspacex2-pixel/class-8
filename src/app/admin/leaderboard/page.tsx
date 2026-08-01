@@ -103,8 +103,9 @@ export default function LeaderboardPage() {
   };
 
   const printRanking = () => {
-    const w = window.open("", "_blank", "width=900,height=700");
-    if (!w) return;
+    try {
+    const w = window.open("", "leaderboard_print", "width=900,height=700");
+    if (!w) { alert("Please allow popups for this site to print rankings."); return; }
     w.document.write(`<!DOCTYPE html><html><head><title>Leaderboard - ${examType}</title>
       <style>
         *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,sans-serif}
@@ -152,7 +153,8 @@ export default function LeaderboardPage() {
     w.document.write('</tbody></table>');
     w.document.write(`<div class="footer">Generated from Admin Dashboard · ${new Date().toLocaleDateString()}</div></body></html>`);
     w.document.close();
-    setTimeout(() => w.print(), 500);
+    setTimeout(() => { try { w.print(); } catch {} }, 500);
+    } catch (e) { alert("Pop-up blocked. Please allow popups for this site."); }
   };
 
   const rankIndicator = (rank: number, roll: number) => {
@@ -259,20 +261,32 @@ export default function LeaderboardPage() {
                   );
                 })}
               </motion.div>
-              {/* 4th and 5th place strip */}
+              {/* 4th and 5th place — mini podium blocks */}
               {ranked.length >= 5 && (
-                <motion.div layout className="flex gap-2 md:gap-4 mt-1">
+                <motion.div layout className="grid grid-cols-2 gap-2 md:gap-4 mt-1">
                   {[3, 4].map(i => {
                     const s = top5[i]; if (!s) return null;
+                    const miniGrains = [
+                      "from-blue-300 via-blue-400 to-blue-600 border-blue-400/50 text-blue-100",
+                      "from-emerald-300 via-emerald-500 to-emerald-700 border-emerald-400/50 text-emerald-100",
+                    ];
                     return (
-                      <motion.div layout key={s.studentId} className="flex-1 flex items-center gap-3 liquid-glass-sm rounded-2xl p-3 cursor-pointer hover:bg-white/40 transition-all"
-                        onClick={() => setViewingStudent(s)}>
-                        <span className="w-7 h-7 rounded-lg bg-royal/10 text-royal text-xs font-bold flex items-center justify-center">{s.displayRank}</span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-semibold text-charcoal truncate">{s.name}</p>
-                          <p className="text-[10px] text-muted">Roll {s.rollNumber} · GPA {s.gpa.toFixed(2)}</p>
+                      <motion.div layout key={s.studentId}
+                        initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 + i * 0.1 }}
+                        className="flex flex-col items-center cursor-pointer" onClick={() => setViewingStudent(s)}>
+                        <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 2.5, repeat: Infinity, delay: i * 0.4 }}
+                          className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-white/90 to-white/60 backdrop-blur-xl border shadow-md flex items-center justify-center mb-1.5"
+                          style={{ borderColor: i === 3 ? "#60a5fa" : "#34d399" }}>
+                          <span className="text-sm md:text-base font-bold gradient-text">{s.name.charAt(0)}</span>
+                        </motion.div>
+                        <p className="text-[9px] md:text-[10px] font-bold text-charcoal text-center truncate max-w-[60px] md:max-w-[100px]">{s.name}</p>
+                        <p className="text-[8px] text-muted mb-1">Roll {s.rollNumber}</p>
+                        <div className={`h-16 md:h-20 w-full rounded-t-2xl bg-gradient-to-b ${miniGrains[i-3] || miniGrains[0]} border border-b-0 flex flex-col items-center justify-start pt-2 relative overflow-hidden shadow-lg`}>
+                          <div className="absolute inset-0 bg-white/5" />
+                          <span className="text-lg md:text-2xl relative z-10">{i === 3 ? "4️⃣" : "5️⃣"}</span>
+                          <span className="text-[9px] md:text-xs font-bold mt-0.5 relative z-10">{s.totalObtained}</span>
+                          <span className="text-[8px] md:text-[10px] font-semibold relative z-10 opacity-70">GPA {s.gpa.toFixed(2)}</span>
                         </div>
-                        <span className="text-xs font-bold text-charcoal">{s.totalObtained}</span>
                       </motion.div>
                     );
                   })}
