@@ -114,10 +114,10 @@ export function calculateGPA(combinedResults: { mark: number; maxMark: number }[
 export function calculateRanks(scores: { id: number; total: number }[]): Map<number, number> {
   const sorted = [...scores].sort((a, b) => b.total - a.total);
   const rankMap = new Map<number, number>();
-  let currentRank = 1;
+  let denseRank = 1;
   for (let i = 0; i < sorted.length; i++) {
-    if (i > 0 && sorted[i].total < sorted[i - 1].total) currentRank = i + 1;
-    rankMap.set(sorted[i].id, currentRank);
+    if (i > 0 && sorted[i].total < sorted[i - 1].total) denseRank++;
+    rankMap.set(sorted[i].id, denseRank);
   }
   return rankMap;
 }

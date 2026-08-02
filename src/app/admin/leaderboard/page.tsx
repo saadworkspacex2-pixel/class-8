@@ -20,8 +20,11 @@ interface StudentResult {
 function computeRanks<T extends { gpa?: number; totalObtained?: number }>(arr: T[], getVal: (s: T) => number): (T & { displayRank: number })[] {
   const result: (T & { displayRank: number })[] = [];
   if (arr.length === 0) return result;
-  let i = 0;
-  while (i < arr.length) { const val = getVal(arr[i]); let j = i; while (j < arr.length && getVal(arr[j]) === val) j++; for (let k = i; k < j; k++) result.push({ ...arr[k], displayRank: i + 1 }); i = j; }
+  let denseRank = 1;
+  for (let i = 0; i < arr.length; i++) {
+    if (i > 0 && getVal(arr[i]) !== getVal(arr[i - 1])) denseRank++;
+    result.push({ ...arr[i], displayRank: denseRank });
+  }
   return result;
 }
 

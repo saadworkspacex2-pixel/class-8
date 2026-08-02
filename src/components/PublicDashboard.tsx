@@ -744,15 +744,14 @@ function PodiumCard({ student, position, height, bgClass }: { student: StudentRe
 function OverallLeaderboardTable({ students, type, maxTotal, onStudentClick }: { students: StudentResult[]; type: LeaderboardType; maxTotal: number; onStudentClick?: (s: StudentResult) => void }) {
   const { t } = useI18n();
 
-  // Assign serial ranks (1,2,3...) based on current sort
+  // Assign dense serial ranks: same score = same rank, next rank = prev rank + 1
   const serialRanks = new Map<number, number>();
   let cur = 1;
   students.forEach((s, i) => {
-    if (type === "overall") {
-      // Tie-rank by GPA: same GPA = same rank
-      if (i > 0 && students[i-1].gpa !== s.gpa) cur = i + 1;
-    } else {
-      cur = i + 1;
+    if (i > 0) {
+      if (type === "overall") { if (students[i-1].gpa !== s.gpa) cur++; }
+      else if (type === "cq") { if (students[i-1].totalCq !== s.totalCq) cur++; }
+      else if (type === "mcq") { if (students[i-1].totalMcq !== s.totalMcq) cur++; }
     }
     serialRanks.set(s.studentId, cur);
   });
