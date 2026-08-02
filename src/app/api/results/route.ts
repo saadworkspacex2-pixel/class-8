@@ -113,7 +113,7 @@ export async function GET(req: NextRequest) {
     const withMarks = studentResults.filter((s: any) => s.hasMarks);
 
     // Ranking by GPA
-    const overallRanks = calculateRanks(withMarks.map((s: any) => ({ id: s.studentId, total: s.gpa })));
+    const overallRanks = calculateRanks(withMarks.map((s: any) => ({ id: s.studentId, total: s.gpa, tieBreak: s.totalObtained })));
 
     // Per-paper subject ranks
     const subjRanks: Record<string, Map<number, number>> = {};

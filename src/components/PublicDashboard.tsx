@@ -749,9 +749,15 @@ function OverallLeaderboardTable({ students, type, maxTotal, onStudentClick }: {
   let cur = 1;
   students.forEach((s, i) => {
     if (i > 0) {
-      if (type === "overall") { if (students[i-1].gpa !== s.gpa) cur++; }
-      else if (type === "cq") { if (students[i-1].totalCq !== s.totalCq) cur++; }
-      else if (type === "mcq") { if (students[i-1].totalMcq !== s.totalMcq) cur++; }
+      const prev = students[i-1];
+      if (type === "overall") {
+        if (prev.gpa !== s.gpa) cur++;
+        else if (prev.gpa === s.gpa && s.totalObtained < prev.totalObtained) cur++;
+      } else if (type === "cq") {
+        if (prev.totalCq !== s.totalCq) cur++;
+      } else if (type === "mcq") {
+        if (prev.totalMcq !== s.totalMcq) cur++;
+      }
     }
     serialRanks.set(s.studentId, cur);
   });

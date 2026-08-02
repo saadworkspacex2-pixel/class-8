@@ -22,7 +22,12 @@ function computeRanks<T extends { gpa?: number; totalObtained?: number }>(arr: T
   if (arr.length === 0) return result;
   let denseRank = 1;
   for (let i = 0; i < arr.length; i++) {
-    if (i > 0 && getVal(arr[i]) !== getVal(arr[i - 1])) denseRank++;
+    if (i > 0) {
+      const prev = arr[i - 1], cur = arr[i];
+      const pVal = getVal(prev), cVal = getVal(cur);
+      if (cVal !== pVal) denseRank++;
+      else if (cVal === pVal && (cur.totalObtained ?? 0) < (prev.totalObtained ?? 0)) denseRank++;
+    }
     result.push({ ...arr[i], displayRank: denseRank });
   }
   return result;

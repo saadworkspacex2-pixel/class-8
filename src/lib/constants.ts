@@ -111,12 +111,19 @@ export function calculateGPA(combinedResults: { mark: number; maxMark: number }[
 }
 
 // ─── RANKING ───
-export function calculateRanks(scores: { id: number; total: number }[]): Map<number, number> {
-  const sorted = [...scores].sort((a, b) => b.total - a.total);
+export function calculateRanks(scores: { id: number; total: number; tieBreak?: number }[]): Map<number, number> {
+  const sorted = [...scores].sort((a, b) => {
+    if (b.total !== a.total) return b.total - a.total;
+    return (b.tieBreak ?? 0) - (a.tieBreak ?? 0);
+  });
   const rankMap = new Map<number, number>();
   let denseRank = 1;
   for (let i = 0; i < sorted.length; i++) {
-    if (i > 0 && sorted[i].total < sorted[i - 1].total) denseRank++;
+    if (i > 0) {
+      const prev = sorted[i - 1], cur = sorted[i];
+      if (cur.total < prev.total) denseRank++;
+      else if (cur.total === prev.total && (cur.tieBreak ?? 0) < (prev.tieBreak ?? 0)) denseRank++;
+    }
     rankMap.set(sorted[i].id, denseRank);
   }
   return rankMap;
