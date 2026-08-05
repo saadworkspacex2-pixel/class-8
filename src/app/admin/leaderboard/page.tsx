@@ -49,7 +49,7 @@ export default function LeaderboardPage() {
   const sorted = useMemo(() => [...filtered].sort((a, b) => { const d = getVal(b) - getVal(a); return d !== 0 ? d : b.gpa - a.gpa || b.totalObtained - a.totalObtained; }), [filtered, tab]);
   const ranked = useMemo(() => denseRank(sorted, getVal), [sorted]);
   const top3 = ranked.slice(0, 3);
-  const next7 = ranked.slice(3, 10);
+  const restOfStudents = ranked.slice(3);
   const today = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 
   const handleExport = () => { const rows = ranked.map(s => `${s.rank},${s.rollNumber},${s.section},${s.name},${s.totalObtained},${s.gpa.toFixed(2)},${s.overallGrade},${s.overallPass ? "PASS" : "FAIL"}`); const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([["Rank,Roll,Section,Name,Total,GPA,Grade,Status", ...rows].join("\n")], { type: "text/csv" })); a.download = `leaderboard-${examType}.csv`; a.click(); };
@@ -162,15 +162,15 @@ export default function LeaderboardPage() {
               </div>
             </motion.div>
 
-            {/* ═══════ RANKS 4–10 ═══════ */}
-            {next7.length > 0 && (
+            {/* ═══════ ALL RANKS LIST ═══════ */}
+            {restOfStudents.length > 0 && (
               <div className="bg-white/60 backdrop-blur-xl border border-white/50 rounded-3xl overflow-hidden shadow-sm no-print">
                 <div className="px-6 py-4 border-b border-white/30 flex items-center gap-3">
                   <div className="w-8 h-8 rounded-xl bg-royal/10 flex items-center justify-center text-royal"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/></svg></div>
-                  <h3 className="text-sm font-bold text-charcoal">Ranks 4–10</h3>
+                  <h3 className="text-sm font-bold text-charcoal">All Rankings — {ranked.length} Students</h3>
                 </div>
                 <div className="space-y-0.5 p-3">
-                  {next7.map((s, i) => (
+                  {restOfStudents.map((s, i) => (
                     <motion.div key={s.studentId} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.03 }}
                       className="flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/50 transition-colors cursor-pointer"
                       onClick={() => setViewing(s)}>
