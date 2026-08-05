@@ -166,6 +166,16 @@ export const pendingChanges = pgTable("pending_changes", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const homework = pgTable("homework", {
+  id: serial("id").primaryKey(),
+  subject: text("subject").notNull(),
+  title: text("title").notNull(),
+  description: text("description").default(""),
+  dueDate: text("due_date").default(""),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const auditLogs = pgTable("audit_logs", {
   id: serial("id").primaryKey(),
   action: text("action").notNull(),
