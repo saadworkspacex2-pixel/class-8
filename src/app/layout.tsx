@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
+import LiquidGlassBackground from "@/components/LiquidGlassBackground";
 
 export const metadata: Metadata = {
   title: "Class 8 Result",
@@ -19,7 +20,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           rel="stylesheet"
         />
       </head>
-      <body className="bg-bg text-charcoal antialiased">{children}</body>
+      <body className="bg-slate-950 text-charcoal antialiased relative min-h-screen">
+        <LiquidGlassBackground />
+        {children}
+      </body>
     </html>
   );
 }

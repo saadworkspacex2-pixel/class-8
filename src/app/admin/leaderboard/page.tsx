@@ -4,6 +4,8 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { EXAM_TYPES, SUBJECTS, GRADE_COLORS } from "@/lib/constants";
+import Leaderboard3DPodium from "@/components/Leaderboard3DPodium";
+import LeaderboardRankList from "@/components/LeaderboardRankList";
 
 interface SubjectResult { subject: string; cq: number; mcq: number; total: number; maxTotal: number; grade: string; pass: boolean; }
 interface GpaSubject { name: string; total: number; maxTotal: number; grade: string; gp: number; pass: boolean; hasMark: boolean; papers: string[]; }
@@ -130,62 +132,19 @@ export default function LeaderboardPage() {
           <div className="py-24 text-center text-muted text-sm">No results available. Enter marks first.</div>
         ) : (
           <>
-            {/* ═══════ TOP 3 PREMIUM PODIUM ═══════ */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
-              className="bg-white/70 backdrop-blur-2xl rounded-[2.5rem] border border-white/50 p-6 md:p-10 shadow-[0_8px_40px_rgba(0,0,0,0.05)] relative overflow-hidden no-print">
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-amber/5 rounded-full blur-[80px] pointer-events-none" />
-              <div className="flex items-center gap-3 justify-center mb-8 relative z-10">
-                <div className="w-10 h-10 rounded-2xl bg-amber-50 flex items-center justify-center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg></div>
-                <h3 className="text-lg md:text-2xl font-extrabold text-charcoal">Top 3 Performers</h3>
-              </div>
-              <div className="grid grid-cols-3 gap-3 md:gap-6 items-end max-w-xl mx-auto relative z-10">
-                {[1, 0, 2].map((idx, col) => {
-                  const s = top3[idx]; if (!s) return <div key={`e-${col}`} />;
-                  const cfg = [{ h: "h-24 md:h-36", bg: "from-amber-100 to-amber-200", border: "border-amber-300", ring: "#fbbf24", icon: "#f59e0b", label: "1st" }, { h: "h-20 md:h-28", bg: "from-slate-100 to-slate-200", border: "border-slate-300", ring: "#94a3b8", icon: "#64748b", label: "2nd" }, { h: "h-16 md:h-24", bg: "from-orange-100 to-orange-200", border: "border-orange-300", ring: "#fb923c", icon: "#ea580c", label: "3rd" }][idx];
-                  return (
-                    <motion.div key={s.studentId} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: col * 0.1, type: "spring", stiffness: 200 }}
-                      className="flex flex-col items-center gap-2 cursor-pointer group" onClick={() => setViewing(s)}>
-                      <motion.div whileHover={{ scale: 1.1, y: -4 }} className="w-14 h-14 md:w-18 md:h-18 rounded-full bg-white shadow-lg flex items-center justify-center shrink-0" style={{ border: `3px solid ${cfg.ring}` }}>
-                        <span className="text-lg md:text-xl font-bold bg-gradient-to-br from-royal to-purple-600 bg-clip-text text-transparent">{s.name.charAt(0)}</span>
-                      </motion.div>
-                      <p className="text-[11px] md:text-xs font-bold text-charcoal truncate max-w-[80px]">{s.name}</p>
-                      <p className="text-[9px] text-muted">R{s.rollNumber}</p>
-                      <div className={`${cfg.h} w-full rounded-2xl bg-gradient-to-b ${cfg.bg} border ${cfg.border} flex flex-col items-center justify-center gap-1 shadow-md transition-transform group-hover:scale-[1.02]`}>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={cfg.icon} strokeWidth="1.5"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
-                        <span className="text-[9px] md:text-[10px] font-extrabold text-muted">{cfg.label}</span>
-                        <span className="text-xs md:text-sm font-extrabold text-charcoal">{s.totalObtained}</span>
-                        <span className={`text-[9px] md:text-[10px] font-bold ${s.gpa >= 5 ? "text-emerald" : s.gpa >= 4 ? "text-royal" : "text-amber"}`}>GPA {s.gpa.toFixed(2)}</span>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </motion.div>
+            {/* ═══════ TOP 3 PREMIUM 3D PODIUM ═══════ */}
+            <div className="no-print">
+              <Leaderboard3DPodium top3={top3} onSelectStudent={setViewing} />
+            </div>
 
-            {/* ═══════ ALL RANKS LIST ═══════ */}
-            {restOfStudents.length > 0 && (
-              <div className="bg-white/60 backdrop-blur-xl border border-white/50 rounded-3xl overflow-hidden shadow-sm no-print">
-                <div className="px-6 py-4 border-b border-white/30 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-royal/10 flex items-center justify-center text-royal"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/></svg></div>
-                  <h3 className="text-sm font-bold text-charcoal">All Rankings — {ranked.length} Students</h3>
-                </div>
-                <div className="space-y-0.5 p-3">
-                  {restOfStudents.map((s, i) => (
-                    <motion.div key={s.studentId} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.03 }}
-                      className="flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/50 transition-colors cursor-pointer"
-                      onClick={() => setViewing(s)}>
-                      <span className="w-8 h-8 rounded-xl flex items-center justify-center text-[10px] font-bold text-muted">#{s.rank}</span>
-                      <div className="w-8 h-8 rounded-full gradient-royal flex items-center justify-center text-white text-xs font-bold shrink-0">{s.name.charAt(0)}</div>
-                      <span className="text-sm font-medium text-charcoal flex-1 truncate">{s.name}</span>
-                      <span className="text-xs text-muted hidden sm:block">{s.rollNumber}</span>
-                      <span className="text-sm font-bold text-charcoal w-16 text-center">{s.totalObtained}</span>
-                      <span className={`text-sm font-bold w-16 text-center ${s.gpa >= 5 ? "text-emerald" : s.gpa >= 4 ? "text-royal" : s.gpa >= 3 ? "text-amber" : "text-muted"}`}>{s.gpa.toFixed(2)}</span>
-                      <span className={`text-[10px] font-bold ${s.overallPass ? "text-emerald" : "text-crimson"}`}>{s.overallPass ? "PASS" : "FAIL"}</span>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* ═══════ RANKINGS LIST TABLE ═══════ */}
+            <div className="no-print pt-4">
+              <LeaderboardRankList
+                students={ranked}
+                onSelectStudent={setViewing}
+                title={`All Rankings — ${ranked.length} Students`}
+              />
+            </div>
           </>
         )}
 

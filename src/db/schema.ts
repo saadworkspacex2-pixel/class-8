@@ -183,3 +183,13 @@ export const auditLogs = pgTable("audit_logs", {
   performedBy: text("performed_by").default("admin"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export const attendance = pgTable("attendance", {
+  id: serial("id").primaryKey(),
+  studentId: integer("student_id").notNull(),
+  date: text("date").notNull(),
+  status: text("status").default("present").notNull(), // present, absent, late, excused
+  remarks: text("remarks").default(""),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
